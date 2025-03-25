@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 interface User {
+  id: string;
   name: string;
   email: string;
 }
@@ -34,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ 
         isAuthenticated: true, 
         user: {
+          id: data.id,
           name: data.name,
           email: data.email
         }

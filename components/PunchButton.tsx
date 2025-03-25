@@ -45,7 +45,11 @@ export default function PunchButton() {
         await punchIn();
       }
     } catch (err) {
-      setError('Failed to record time. Please try again.');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import {
   StyleSheet,
   ImageBackground,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../store/authStore';
@@ -17,18 +18,28 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function LoginScreen() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
   const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError('');
-    if (login(username, password)) {
-      router.replace('/(tabs)');
-    } else {
-      setError('Invalid credentials');
+    setLoading(true);
+    
+    try {
+      const success = await login(email, password);
+      if (success) {
+        router.replace('/(tabs)');
+      } else {
+        setError('Something went wrong');
+      }
+    } catch (err) {
+      setError('Something went wrong');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -55,11 +66,12 @@ export default function LoginScreen() {
           >
             <TextInput
               style={styles.input}
-              placeholder="Username"
+              placeholder="Email"
               placeholderTextColor="#999"
-              value={username}
-              onChangeText={setUsername}
+              value={email}
+              onChangeText={setEmail}
               autoCapitalize="none"
+              keyboardType="email-address"
             />
             <TextInput
               style={styles.input}
@@ -71,10 +83,15 @@ export default function LoginScreen() {
             />
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <Pressable 
-              style={styles.button}
+              style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleLogin}
+              disabled={loading}
             >
-              <Text style={styles.buttonText}>Sign In</Text>
+              {loading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text style={styles.buttonText}>Sign In</Text>
+              )}
             </Pressable>
           </Animated.View>
         </Animated.View>
@@ -128,6 +145,9 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
     color: '#000',

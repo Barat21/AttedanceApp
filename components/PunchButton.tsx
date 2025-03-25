@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { StyleSheet, Pressable, View, Text } from 'react-native';
+import { useCallback, useState } from 'react';
+import { StyleSheet, Pressable, View, Text, ActivityIndicator } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withSpring,
@@ -11,32 +11,43 @@ import { useTimeStore } from '../store/timeStore';
 
 export default function PunchButton() {
   const { currentSession, punchIn, punchOut } = useTimeStore();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const scale = useSharedValue(1);
   const rotation = useSharedValue('0deg');
   const glow = useSharedValue(0);
 
-  const handlePress = useCallback(() => {
-    scale.value = withSequence(
-      withSpring(0.9),
-      withSpring(1.1),
-      withSpring(1)
-    );
-    
-    rotation.value = withSequence(
-      withTiming('-15deg'),
-      withTiming('15deg'),
-      withTiming('0deg')
-    );
+  const handlePress = useCallback(async () => {
+    try {
+      setError(null);
+      setLoading(true);
 
-    glow.value = withSequence(
-      withTiming(1),
-      withTiming(0, { duration: 1000 })
-    );
+      scale.value = withSequence(
+        withSpring(0.9),
+        withSpring(1.1),
+        withSpring(1)
+      );
+      
+      rotation.value = withSequence(
+        withTiming('-15deg'),
+        withTiming('15deg'),
+        withTiming('0deg')
+      );
 
-    if (currentSession) {
-      punchOut();
-    } else {
-      punchIn();
+      glow.value = withSequence(
+        withTiming(1),
+        withTiming(0, { duration: 1000 })
+      );
+
+      if (currentSession) {
+        await punchOut();
+      } else {
+        await punchIn();
+      }
+    } catch (err) {
+      setError('Failed to record time. Please try again.');
+    } finally {
+      setLoading(false);
     }
   }, [currentSession, punchIn, punchOut]);
 
@@ -55,23 +66,32 @@ export default function PunchButton() {
     <View style={styles.container}>
       <Animated.View style={[styles.glowEffect, glowStyle]} />
       <View style={styles.tooltipContainer}>
-        <Text style={styles.tooltip}>
-          {currentSession ? 'Tap to punch out' : 'Tap to punch in'}
-        </Text>
+        {error ? (
+          <Text style={[styles.tooltip, styles.error]}>{error}</Text>
+        ) : (
+          <Text style={styles.tooltip}>
+            {currentSession ? 'Tap to punch out' : 'Tap to punch in'}
+          </Text>
+        )}
       </View>
-      <Pressable onPress={handlePress}>
+      <Pressable onPress={handlePress} disabled={loading}>
         <Animated.View style={[
           styles.button,
           buttonStyle,
-          currentSession ? styles.active : styles.inactive
+          currentSession ? styles.active : styles.inactive,
+          loading && styles.buttonDisabled
         ]}>
           <View style={styles.buttonInner}>
-            <Text style={[
-              styles.buttonText,
-              currentSession ? styles.activeText : styles.inactiveText
-            ]}>
-              {currentSession ? 'OUT' : 'IN'}
-            </Text>
+            {loading ? (
+              <ActivityIndicator color={currentSession ? '#fff' : '#000'} />
+            ) : (
+              <Text style={[
+                styles.buttonText,
+                currentSession ? styles.activeText : styles.inactiveText
+              ]}>
+                {currentSession ? 'OUT' : 'IN'}
+              </Text>
+            )}
           </View>
         </Animated.View>
       </Pressable>
@@ -114,6 +134,9 @@ const styles = StyleSheet.create({
   inactive: {
     backgroundColor: '#00ff87',
   },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
   buttonText: {
     fontSize: 24,
     fontFamily: 'Inter-Bold',
@@ -144,6 +167,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontFamily: 'Inter-Regular',
+  },
+  error: {
+    color: '#ff4444',
   },
   status: {
     marginTop: 16,

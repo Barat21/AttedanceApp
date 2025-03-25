@@ -11,7 +11,7 @@ import { useAuthStore } from '../../store/authStore';
 SplashScreen.preventAutoHideAsync();
 
 export default function TabOneScreen() {
-  const username = useAuthStore((state) => state.username);
+  const user = useAuthStore((state) => state.user);
   const [fontsLoaded, fontError] = useFonts({
     'Inter-Regular': Inter_400Regular,
     'Inter-Bold': Inter_700Bold,
@@ -33,7 +33,7 @@ export default function TabOneScreen() {
         entering={FadeIn.delay(200)}
         style={styles.greeting}
       >
-        Welcome, {username}!
+        Welcome, {user?.name}!
       </Animated.Text>
       <TimeDisplay />
       <PunchButton />

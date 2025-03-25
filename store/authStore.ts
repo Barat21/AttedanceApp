@@ -1,21 +1,48 @@
 import { create } from 'zustand';
 
+interface User {
+  name: string;
+  email: string;
+}
+
 interface AuthState {
   isAuthenticated: boolean;
-  username: string | null;
-  login: (username: string, password: string) => boolean;
+  user: User | null;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
-  username: null,
-  login: (username: string, password: string) => {
-    if (username === 'test' && password === 'test') {
-      set({ isAuthenticated: true, username });
+  user: null,
+  login: async (email: string, password: string) => {
+    try {
+      const response = await fetch('https://people-pilot-employee-service.onrender.com/api/employee/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.status !== 200) {
+        throw new Error('Something went wrong');
+      }
+
+      const { data } = await response.json();
+      
+      set({ 
+        isAuthenticated: true, 
+        user: {
+          name: data.name,
+          email: data.email
+        }
+      });
+      
       return true;
+    } catch (error) {
+      return false;
     }
-    return false;
   },
-  logout: () => set({ isAuthenticated: false, username: null }),
+  logout: () => set({ isAuthenticated: false, user: null }),
 }));

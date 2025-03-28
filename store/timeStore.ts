@@ -10,6 +10,7 @@ interface TimeEntry {
 interface TimeState {
   currentSession: TimeEntry | null;
   history: TimeEntry[];
+  checkStatus: () => Promise<void>;
   punchIn: () => Promise<void>;
   punchOut: () => Promise<void>;
 }
@@ -28,6 +29,36 @@ async function getCurrentPosition(): Promise<GeolocationPosition> {
 export const useTimeStore = create<TimeState>((set) => ({
   currentSession: null,
   history: [],
+  checkStatus: async () => {
+    try {
+      const user = useAuthStore.getState().user;
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const response = await fetch(`https://people-pilot.onrender.com/api/attendance/status?employee_id=${user.id}`);
+      const data = await response.json();
+      
+      if (data.status === 200 && data.message === "Employee is currently clocked in") {
+        set({
+          currentSession: {
+            id: Date.now().toString(),
+            punchIn: new Date(),
+            punchOut: null,
+          },
+        });
+      } else {
+        set({ currentSession: null });
+      }
+    } catch (error) {
+      set({ currentSession: null });
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Failed to check status');
+    }
+  },
   punchIn: async () => {
     try {
       const position = await getCurrentPosition();

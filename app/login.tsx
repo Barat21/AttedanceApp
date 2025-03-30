@@ -15,6 +15,8 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeInUp,
+  useAnimatedStyle,
+  withSpring,
 } from 'react-native-reanimated';
 
 export default function LoginScreen() {
@@ -24,6 +26,10 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const login = useAuthStore((state) => state.login);
   const router = useRouter();
+
+  const formStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1, { damping: 12 }) }],
+  }));
 
   const handleLogin = async () => {
     setError('');
@@ -54,15 +60,15 @@ export default function LoginScreen() {
           style={styles.container}
         >
           <Animated.Text 
-            entering={FadeInUp.delay(400)}
+            entering={FadeInUp.springify().delay(400)}
             style={styles.title}
           >
             Welcome Back
           </Animated.Text>
           
           <Animated.View 
-            entering={FadeInDown.delay(600)}
-            style={styles.form}
+            entering={FadeInDown.springify().delay(600)}
+            style={[styles.form, formStyle]}
           >
             <TextInput
               style={styles.input}
@@ -119,6 +125,10 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     backdropFilter: 'blur(10px)',
+    shadowColor: '#00ff87',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
   },
   title: {
     fontSize: 32,
@@ -126,7 +136,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     marginBottom: 32,
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
   },
   form: {
     gap: 16,
@@ -137,7 +147,7 @@ const styles = StyleSheet.create({
     padding: 16,
     color: '#fff',
     fontSize: 16,
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
   button: {
     backgroundColor: '#00ff87',
@@ -145,6 +155,10 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: '#00ff87',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   buttonDisabled: {
     opacity: 0.7,
@@ -153,11 +167,11 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
     fontWeight: 'bold',
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
   },
   error: {
     color: '#ff4444',
     textAlign: 'center',
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
 });

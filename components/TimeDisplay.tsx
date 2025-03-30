@@ -5,6 +5,8 @@ import Animated, {
   withSpring,
   withRepeat,
   withSequence,
+  FadeIn,
+  SlideInDown,
 } from 'react-native-reanimated';
 import { useTimeStore } from '../store/timeStore';
 
@@ -15,8 +17,8 @@ export default function TimeDisplay() {
     transform: [
       { scale: withRepeat(
         withSequence(
-          withSpring(1.05),
-          withSpring(1)
+          withSpring(1.05, { damping: 10 }),
+          withSpring(1, { damping: 10 })
         ),
         -1,
         true
@@ -26,7 +28,10 @@ export default function TimeDisplay() {
   }));
 
   return (
-    <View style={styles.container}>
+    <Animated.View 
+      entering={SlideInDown.springify().delay(300)}
+      style={styles.container}
+    >
       <View style={styles.card}>
         <Animated.View style={[styles.timeContainer, pulseAnim]}>
           <Text style={styles.time}>
@@ -36,7 +41,10 @@ export default function TimeDisplay() {
             {format(new Date(), 'EEEE, MMMM d')}
           </Text>
         </Animated.View>
-        <View style={styles.statusContainer}>
+        <Animated.View 
+          entering={FadeIn.delay(600)}
+          style={styles.statusContainer}
+        >
           <View style={[
             styles.statusDot,
             currentSession ? styles.statusActive : styles.statusInactive
@@ -44,9 +52,9 @@ export default function TimeDisplay() {
           <Text style={styles.statusText}>
             {currentSession ? 'Active Session' : 'No Active Session'}
           </Text>
-        </View>
+        </Animated.View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -63,6 +71,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+    shadowColor: '#00ff87',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
   },
   timeContainer: {
     alignItems: 'center',
@@ -72,14 +84,14 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: '#fff',
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
     letterSpacing: 2,
   },
   date: {
     fontSize: 18,
     color: '#888',
     marginTop: 8,
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
   statusContainer: {
     flexDirection: 'row',
@@ -88,6 +100,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    shadowColor: '#00ff87',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   statusDot: {
     width: 8,
@@ -108,6 +124,6 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#fff',
     fontSize: 14,
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
 });

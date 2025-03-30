@@ -2,31 +2,47 @@ import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
 import { format, formatDistanceStrict } from 'date-fns';
 import { useTimeStore } from '../../store/timeStore';
 import { ChevronRight } from 'lucide-react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { 
+  FadeInDown,
+  SlideInLeft,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated';
 
 export default function HistoryScreen() {
   const { history } = useTimeStore();
 
+  const headerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: withSpring(0, { damping: 15 }) }],
+    opacity: withSpring(1),
+  }));
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View 
+        style={[styles.header, headerStyle]}
+        entering={SlideInLeft.springify()}
+      >
         <Text style={styles.title}>Time History</Text>
         <Text style={styles.subtitle}>Your recent work sessions</Text>
-      </View>
+      </Animated.View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {history.length === 0 ? (
-          <View style={styles.emptyState}>
+          <Animated.View 
+            entering={FadeInDown.springify()}
+            style={styles.emptyState}
+          >
             <Text style={styles.emptyTitle}>No History Yet</Text>
             <Text style={styles.emptyText}>
               Your work sessions will appear here once you start tracking time.
             </Text>
-          </View>
+          </Animated.View>
         ) : (
           history.map((entry, index) => (
             <Animated.View
               key={entry.id}
-              entering={FadeInDown.delay(index * 100)}
+              entering={FadeInDown.springify().delay(index * 100)}
               style={styles.entry}
             >
               <View style={styles.dateContainer}>
@@ -81,13 +97,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
   },
   subtitle: {
     fontSize: 16,
     color: '#888',
     marginTop: 4,
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
   scrollView: {
     flex: 1,
@@ -98,6 +114,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
+    shadowColor: '#00ff87',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   dateContainer: {
     flexDirection: 'row',
@@ -108,13 +128,13 @@ const styles = StyleSheet.create({
   date: {
     color: '#fff',
     fontSize: 18,
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
   },
   duration: {
     color: '#00ff87',
     fontSize: 14,
     marginTop: 4,
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
   timeContainer: {
     flexDirection: 'row',
@@ -131,12 +151,12 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 12,
     marginBottom: 4,
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
   time: {
     color: '#fff',
     fontSize: 16,
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
   },
   timeSeparator: {
     width: 1,
@@ -155,13 +175,13 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     color: '#fff',
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
     marginBottom: 8,
   },
   emptyText: {
     fontSize: 14,
     color: '#888',
     textAlign: 'center',
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
 });

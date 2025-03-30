@@ -11,8 +11,9 @@ export default function RootLayout() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="login" options={{ animation: 'fade' }} />
-        {isAuthenticated && (
+        {!isAuthenticated ? (
+          <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        ) : (
           <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         )}
         <Stack.Screen name="+not-found" />

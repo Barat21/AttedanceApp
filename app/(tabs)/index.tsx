@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#1a1a1a',
+    paddingBottom: 64, // Add padding to account for the logout button
   },
   greeting: {
     fontSize: 24,

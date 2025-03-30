@@ -1,11 +1,14 @@
+import { View, Text } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Clock, History, Settings } from 'lucide-react-native';
+import { LogOut } from 'lucide-react-native';
 import Animated, { 
   useAnimatedStyle,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useAuthStore } from '../../store/authStore';
 
 function TabBarIcon({ Icon, focused }: { Icon: any, focused: boolean }) {
   const animatedStyle = useAnimatedStyle(() => ({
@@ -23,62 +26,54 @@ function TabBarIcon({ Icon, focused }: { Icon: any, focused: boolean }) {
 }
 
 export default function TabLayout() {
+  const router = useRouter();
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: 'rgba(26, 26, 26, 0.98)',
-          borderTopColor: '#333',
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 8,
-          elevation: 0,
-          shadowOpacity: 0,
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Tabs.Screen
+          name="index"
+          options={{
+            href: null,
+          }}
+        />
+      </Tabs>
+      <Pressable
+        onPress={handleLogout}
+        style={{
           position: 'absolute',
           bottom: 0,
-        },
-        tabBarButton: (props) => (
-          <Pressable
-            {...props}
-            style={[
-              props.style,
-              {
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              },
-            ]}
-          />
-        ),
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Clock',
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon Icon={Clock} focused={focused} />
-          ),
+          left: 0,
+          right: 0,
+          height: 64,
+          backgroundColor: 'rgba(26, 26, 26, 0.98)',
+          borderTopColor: '#333',
+          borderTopWidth: 1,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 8,
         }}
-      />
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: 'History',
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon Icon={History} focused={focused} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon Icon={Settings} focused={focused} />
-          ),
-        }}
-      />
-    </Tabs>
+      >
+        <TabBarIcon Icon={LogOut} focused={true} />
+        <Text style={{
+          color: '#00ff87',
+          fontSize: 16,
+          fontFamily: 'Outfit-Bold',
+        }}>
+          Logout
+        </Text>
+      </Pressable>
+    </View>
   );
 }

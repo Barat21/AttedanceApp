@@ -6,6 +6,8 @@ import Animated, {
   withSequence,
   withTiming,
   useSharedValue,
+  SlideInUp,
+  FadeIn,
 } from 'react-native-reanimated';
 import { useTimeStore } from '../store/timeStore';
 
@@ -23,19 +25,19 @@ export default function PunchButton() {
       setLoading(true);
 
       scale.value = withSequence(
-        withSpring(0.9),
-        withSpring(1.1),
-        withSpring(1)
+        withSpring(0.9, { damping: 10 }),
+        withSpring(1.1, { damping: 8 }),
+        withSpring(1, { damping: 12 })
       );
       
       rotation.value = withSequence(
-        withTiming('-15deg'),
-        withTiming('15deg'),
-        withTiming('0deg')
+        withTiming('-15deg', { duration: 150 }),
+        withTiming('15deg', { duration: 150 }),
+        withTiming('0deg', { duration: 150 })
       );
 
       glow.value = withSequence(
-        withTiming(1),
+        withTiming(1, { duration: 200 }),
         withTiming(0, { duration: 1000 })
       );
 
@@ -64,12 +66,19 @@ export default function PunchButton() {
 
   const glowStyle = useAnimatedStyle(() => ({
     opacity: glow.value,
+    transform: [{ scale: withSpring(glow.value ? 1.2 : 1, { damping: 12 }) }],
   }));
 
   return (
-    <View style={styles.container}>
+    <Animated.View 
+      entering={SlideInUp.springify().delay(400)}
+      style={styles.container}
+    >
       <Animated.View style={[styles.glowEffect, glowStyle]} />
-      <View style={styles.tooltipContainer}>
+      <Animated.View 
+        entering={FadeIn.delay(600)}
+        style={styles.tooltipContainer}
+      >
         {error ? (
           <Text style={[styles.tooltip, styles.error]}>{error}</Text>
         ) : (
@@ -77,7 +86,7 @@ export default function PunchButton() {
             {currentSession ? 'Tap to punch out' : 'Tap to punch in'}
           </Text>
         )}
-      </View>
+      </Animated.View>
       <Pressable onPress={handlePress} disabled={loading}>
         <Animated.View style={[
           styles.button,
@@ -99,10 +108,13 @@ export default function PunchButton() {
           </View>
         </Animated.View>
       </Pressable>
-      <Text style={styles.status}>
+      <Animated.Text 
+        entering={FadeIn.delay(800)}
+        style={styles.status}
+      >
         {currentSession ? 'Currently Working' : 'Not Clocked In'}
-      </Text>
-    </View>
+      </Animated.Text>
+    </Animated.View>
   );
 }
 
@@ -131,19 +143,25 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   active: {
     backgroundColor: '#ff4444',
+    shadowColor: '#ff4444',
   },
   inactive: {
     backgroundColor: '#00ff87',
+    shadowColor: '#00ff87',
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
     fontSize: 24,
-    fontFamily: 'Inter-Bold',
+    fontFamily: 'Outfit-Bold',
     letterSpacing: 2,
   },
   activeText: {
@@ -159,6 +177,10 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     backgroundColor: '#00ff87',
     opacity: 0,
+    shadowColor: '#00ff87',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
   },
   tooltipContainer: {
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -166,11 +188,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   tooltip: {
     color: '#fff',
     fontSize: 14,
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
   error: {
     color: '#ff4444',
@@ -179,6 +205,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     color: '#888',
-    fontFamily: 'Inter-Regular',
+    fontFamily: 'Outfit-Regular',
   },
 });
